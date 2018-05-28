@@ -20,7 +20,7 @@ public class CancellationJob {
     @Autowired
     private OfferRepository offerRepository;
 
-    @Scheduled(cron = "0 1 0 * * *")
+    @Scheduled(cron = "0/1 0 0 * * *")
     public void cancelOffers() {
 
         LOGGER.info("Start offer cancellation process");

@@ -34,7 +34,8 @@ In the root of the project:
 - because an offer cannot logically exist without a product, this has been introduced in the context even though
 the statement requires only endpoints for the offers
 - Assumptions related to offers:
-    - an offer starts and ends at midnight (12am), timezone is set to the running system's timezone
+    - an offer starts and ends at midnight (12am), timezone is set to the running system's timezone. A scheduled jobs is
+    set to run at 12:00:01 AM and cancel the offers with the end date in the past.  
     - offer *uniqueness* is determined by the **description**
     - offers can have the following statuses: **ACTIVE** (when it is created) and **EXPIRED** (after it is cancelled). This 
     information is returned in the JSON payload and is used to reflect the state of the offer
