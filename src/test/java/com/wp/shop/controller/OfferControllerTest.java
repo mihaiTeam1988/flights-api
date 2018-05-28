@@ -1,9 +1,10 @@
 package com.wp.shop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wp.shop.model.transfer.OfferDtoWrite;
 import com.wp.shop.util.TestData;
 import com.wp.shop.model.domain.Offer;
-import com.wp.shop.model.transfer.OfferDto;
+import com.wp.shop.model.transfer.OfferDtoRead;
 import com.wp.shop.service.OfferService;
 import com.wp.shop.util.Mapper;
 import com.wp.shop.util.Status;
@@ -33,12 +34,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class OfferControllerTest {
 
     private MockMvc mockMvc;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private Offer offer;
-
-    private OfferDto offerDto;
+    private OfferDtoRead offerDtoRead;
+    private OfferDtoWrite offerDtoWrite;
 
     @Mock
     private OfferService offerService;
@@ -55,12 +55,13 @@ public class OfferControllerTest {
     @Before
     public void before() {
         offer = TestData.getOffer(Status.ACTIVE);
-        offerDto = TestData.getOfferDto(Status.ACTIVE);
+        offerDtoRead = TestData.getOfferDtoRead(Status.ACTIVE);
+        offerDtoWrite = TestData.getOfferDtoWrite();
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-        when(mapper.transformOfferToOfferDto(offer)).thenReturn(offerDto);
-        when(mapper.transformOfferDtoToOffer(offerDto)).thenReturn(offer);
+        when(mapper.transformOfferToOfferDtoRead(offer)).thenReturn(offerDtoRead);
+        when(mapper.transformOfferDtoWriteToOffer(any(OfferDtoWrite.class))).thenReturn(offer);
     }
 
     @Test
@@ -109,18 +110,17 @@ public class OfferControllerTest {
     public void shouldCreateOffer() throws Exception {
 
         when(offerService.createOffer(offer)).thenReturn(offer.getId());
-        when(mapper.transformOfferDtoToOffer(any(OfferDto.class))).thenReturn(offer);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
                         .post("/offers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offerDto)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(offerDtoWrite)))
+                .andExpect(status().isCreated())
                 .andExpect(content().string(offer.getId().toString()));
 
         verify(offerService, times(1)).createOffer(offer);
-        verify(validator, times(1)).validateStatusAndDates(any(OfferDto.class));
+        verify(validator, times(1)).validateDates(any(OfferDtoWrite.class));
         verifyNoMoreInteractions(offerService);
     }
 

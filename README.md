@@ -12,9 +12,15 @@ In the root of the project:
 * Access the swagger UI: ```http://localhost:8080/shop/swagger-ui.html```
 
 ### Endpoints
-    /offers          - get all offers with filtering param for status | create offer
-           /{id}     - get offer with id | cancel offer with id
-    /products        - get all products | create product
+    /offers       
+        /GET  - get all offers with filtering param for status
+        /POST - create offer
+    /offers/{id}
+        /GET  - get offer with id
+        /PUT  - cancel offer with id
+    /products
+        /GET  - get all products
+        /POST - create product
 
 ### Tools and Frameworks
 * Java8
@@ -25,7 +31,7 @@ In the root of the project:
 * Swagger - API documentation
 
 ### Assumptions
-- because an offer cannot logically exist without a product, this has been introduced in the context as well even though
+- because an offer cannot logically exist without a product, this has been introduced in the context even though
 the statement requires only endpoints for the offers
 - Assumptions related to offers:
     - an offer starts and ends at midnight (12am), timezone is set to the running system's timezone
@@ -35,14 +41,11 @@ the statement requires only endpoints for the offers
 - Assumptions related to products:
     - product *uniqueness* is determined by the **name**
 - authentication and authorisation have been ignored for simplicity
-- for simplicity, it is assumed that only one server is running so the scheduled job execution does not need to be
-synchronized with other jobs running in a clustered setup. For that a cluster management tool needs to be implemented
-like Zookeeper
+- for simplicity, it is assumed that the app is running on a single server. In this way the scheduled job execution does 
+not need to be synchronized with jobs running on other servers in a cluster. In that case, a cluster management tool like 
+Zookeeper should have been implemented.
 
 ### Caveats
 - because it is an in-memory database which is initialised at startup the data used to 
 populate the DB at startup will is used for repository unit test as well
-
-
-CQRS to avoid sending status and id when creating product/offer
 

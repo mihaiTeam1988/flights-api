@@ -3,9 +3,11 @@ package com.wp.shop.util;
 import com.wp.shop.model.data.OfferDao;
 import com.wp.shop.model.data.ProductDao;
 import com.wp.shop.model.domain.Offer;
-import com.wp.shop.model.transfer.OfferDto;
+import com.wp.shop.model.transfer.OfferDtoRead;
 import com.wp.shop.model.domain.Product;
-import com.wp.shop.model.transfer.ProductDto;
+import com.wp.shop.model.transfer.OfferDtoWrite;
+import com.wp.shop.model.transfer.ProductDtoRead;
+import com.wp.shop.model.transfer.ProductDtoWrite;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,8 +16,8 @@ public class Mapper {
     /*
      * Offer mappers
      */
-    public OfferDto transformOfferToOfferDto(Offer offer) {
-        OfferDto dto = new OfferDto();
+    public OfferDtoRead transformOfferToOfferDtoRead(Offer offer) {
+        OfferDtoRead dto = new OfferDtoRead();
 
         dto.setId(offer.getId());
         dto.setProductId(offer.getProductId());
@@ -29,7 +31,7 @@ public class Mapper {
         return dto;
     }
 
-    public Offer transformOfferDtoToOffer(OfferDto offerDto) {
+    public Offer transformOfferDtoWriteToOffer(OfferDtoWrite offerDto) {
         Offer offer = new Offer();
 
         offer.setProductId(offerDto.getProductId());
@@ -38,7 +40,7 @@ public class Mapper {
         offer.setDescription(offerDto.getDescription());
         offer.setStartDate(offerDto.getStartDate());
         offer.setEndDate(offerDto.getEndDate());
-        offer.setStatus(offerDto.getStatus());
+        offer.setStatus(Status.ACTIVE);
 
         return offer;
     }
@@ -76,8 +78,8 @@ public class Mapper {
     /*
      * Product mappers
      */
-    public ProductDto transformProductToProductDto(Product product) {
-        ProductDto productDto = new ProductDto();
+    public ProductDtoRead transformProductToProductDtoRead(Product product) {
+        ProductDtoRead productDto = new ProductDtoRead();
 
         productDto.setId(product.getId());
         productDto.setName(product.getName());
@@ -87,7 +89,7 @@ public class Mapper {
         return productDto;
     }
 
-    public Product transformProductDtoToProduct(ProductDto productDto) {
+    public Product transformProductDtoWriteToProduct(ProductDtoWrite productDto) {
         Product product = new Product();
 
         product.setName(productDto.getName());

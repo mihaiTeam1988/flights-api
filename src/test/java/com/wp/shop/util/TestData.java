@@ -3,9 +3,11 @@ package com.wp.shop.util;
 import com.wp.shop.model.data.OfferDao;
 import com.wp.shop.model.data.ProductDao;
 import com.wp.shop.model.domain.Offer;
-import com.wp.shop.model.transfer.OfferDto;
+import com.wp.shop.model.transfer.OfferDtoRead;
 import com.wp.shop.model.domain.Product;
-import com.wp.shop.model.transfer.ProductDto;
+import com.wp.shop.model.transfer.OfferDtoWrite;
+import com.wp.shop.model.transfer.ProductDtoRead;
+import com.wp.shop.model.transfer.ProductDtoWrite;
 
 import java.time.Instant;
 import java.util.Date;
@@ -38,8 +40,8 @@ public final class TestData {
         return offer;
     }
 
-    public static OfferDto getOfferDto(Status status) {
-        OfferDto offer = new OfferDto();
+    public static OfferDtoRead getOfferDtoRead(Status status) {
+        OfferDtoRead offer = new OfferDtoRead();
         offer.setId(OFFER_ID);
         offer.setDescription(DESCRIPTION);
         offer.setPrice(PRICE);
@@ -48,6 +50,18 @@ public final class TestData {
         offer.setStartDate(START_DATE);
         offer.setEndDate(END_DATE);
         offer.setStatus(status);
+
+        return offer;
+    }
+
+    public static OfferDtoWrite getOfferDtoWrite() {
+        OfferDtoWrite offer = new OfferDtoWrite();
+        offer.setDescription(DESCRIPTION);
+        offer.setPrice(PRICE);
+        offer.setCurrency(CURRENCY);
+        offer.setProductId(PRODUCT_ID);
+        offer.setStartDate(START_DATE);
+        offer.setEndDate(END_DATE);
 
         return offer;
     }
@@ -76,12 +90,21 @@ public final class TestData {
         return product;
     }
 
-    public static ProductDto getProductDto() {
-        ProductDto productDto = new ProductDto();
+    public static ProductDtoRead getProductDtoRead() {
+        ProductDtoRead productDto = new ProductDtoRead();
         productDto.setCurrency(CURRENCY);
         productDto.setPrice(PRICE);
         productDto.setName(NAME);
         productDto.setId(PRODUCT_ID);
+
+        return productDto;
+    }
+
+    public static ProductDtoWrite getProductDtoWrite() {
+        ProductDtoWrite productDto = new ProductDtoWrite();
+        productDto.setCurrency(CURRENCY);
+        productDto.setPrice(PRICE);
+        productDto.setName(NAME);
 
         return productDto;
     }

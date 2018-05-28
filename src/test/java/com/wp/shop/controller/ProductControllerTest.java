@@ -1,9 +1,10 @@
 package com.wp.shop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wp.shop.model.transfer.ProductDtoWrite;
 import com.wp.shop.util.TestData;
 import com.wp.shop.model.domain.Product;
-import com.wp.shop.model.transfer.ProductDto;
+import com.wp.shop.model.transfer.ProductDtoRead;
 import com.wp.shop.service.ProductService;
 import com.wp.shop.util.Mapper;
 import org.junit.Before;
@@ -35,8 +36,8 @@ public class ProductControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private Product product;
-
-    private ProductDto productDto;
+    private ProductDtoRead productDtoRead;
+    private ProductDtoWrite productDtoWrite;
 
     @Mock
     private ProductService productService;
@@ -50,12 +51,13 @@ public class ProductControllerTest {
     @Before
     public void before() {
         product = TestData.getProduct();
-        productDto = TestData.getProductDto();
+        productDtoRead = TestData.getProductDtoRead();
+        productDtoWrite = TestData.getProductDtoWrite();
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-        when(mapper.transformProductToProductDto(product)).thenReturn(productDto);
-        when(mapper.transformProductDtoToProduct(productDto)).thenReturn(product);
+        when(mapper.transformProductToProductDtoRead(product)).thenReturn(productDtoRead);
+        when(mapper.transformProductDtoWriteToProduct(productDtoWrite)).thenReturn(product);
     }
 
     @Test
@@ -79,14 +81,14 @@ public class ProductControllerTest {
     public void shouldCreateProduct() throws Exception {
 
         when(productService.createProduct(product)).thenReturn(product.getId());
-        when(mapper.transformProductDtoToProduct(any(ProductDto.class))).thenReturn(product);
+        when(mapper.transformProductDtoWriteToProduct(any(ProductDtoWrite.class))).thenReturn(product);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
                         .post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(productDto)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(productDtoWrite)))
+                .andExpect(status().isCreated())
                 .andExpect(content().string(product.getId().toString()));
 
         verify(productService, times(1)).createProduct(product);

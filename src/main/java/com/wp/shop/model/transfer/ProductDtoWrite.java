@@ -9,10 +9,9 @@ import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "id")
-public class ProductDto {
+@EqualsAndHashCode
+public class ProductDtoWrite {
 
-    private Long id;
     @NotEmpty(message = "Name cannot be empty")
     private String name;
     @Positive(message = "Price should be a positive value")
@@ -22,7 +21,7 @@ public class ProductDto {
 
     @Override
     public String toString() {
-        return "ProductDto {" +
+        return "ProductDtoWrite {" +
                 "name='" + name + '\'' +
                 ", price=" + price +
                 ", currency='" + currency + '\'' +

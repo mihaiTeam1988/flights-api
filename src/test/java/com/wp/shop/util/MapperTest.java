@@ -4,8 +4,10 @@ import com.wp.shop.model.data.OfferDao;
 import com.wp.shop.model.data.ProductDao;
 import com.wp.shop.model.domain.Offer;
 import com.wp.shop.model.domain.Product;
-import com.wp.shop.model.transfer.OfferDto;
-import com.wp.shop.model.transfer.ProductDto;
+import com.wp.shop.model.transfer.OfferDtoRead;
+import com.wp.shop.model.transfer.OfferDtoWrite;
+import com.wp.shop.model.transfer.ProductDtoRead;
+import com.wp.shop.model.transfer.ProductDtoWrite;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -15,23 +17,25 @@ public class MapperTest {
 
     private static final Offer OFFER = TestData.getOffer(Status.ACTIVE);
     private static final OfferDao OFFER_DAO = TestData.getOfferDao(Status.ACTIVE);
-    private static final OfferDto OFFER_DTO = TestData.getOfferDto(Status.ACTIVE);
+    private static final OfferDtoRead OFFER_DTO_READ = TestData.getOfferDtoRead(Status.ACTIVE);
+    private static final OfferDtoWrite OFFER_DTO_WRITE = TestData.getOfferDtoWrite();
 
     private static final Product PRODUCT = TestData.getProduct();
     private static final ProductDao PRODUCT_DAO = TestData.getProductDao();
-    private static final ProductDto PRODUCT_DTO = TestData.getProductDto();
+    private static final ProductDtoRead PRODUCT_DTO_READ = TestData.getProductDtoRead();
+    private static final ProductDtoWrite PRODUCT_DTO_WRITE = TestData.getProductDtoWrite();
 
     private Mapper mapper = new Mapper();
 
     @Test
     public void shouldTransformOfferToOfferDto() {
-        OfferDto offerDto = mapper.transformOfferToOfferDto(OFFER);
-        assertEquals(OFFER_DTO, offerDto);
+        OfferDtoRead offerDto = mapper.transformOfferToOfferDtoRead(OFFER);
+        assertEquals(OFFER_DTO_READ, offerDto);
     }
 
     @Test
-    public void shouldTransformOfferDtoToOffer() {
-        Offer offer = mapper.transformOfferDtoToOffer(OFFER_DTO);
+    public void shouldTransformOfferDtoWriteToOffer() {
+        Offer offer = mapper.transformOfferDtoWriteToOffer(OFFER_DTO_WRITE);
         assertEquals(OFFER, offer);
     }
 
@@ -49,13 +53,13 @@ public class MapperTest {
 
     @Test
     public void shouldTransformProductToProductDto() {
-        ProductDto productDto = mapper.transformProductToProductDto(PRODUCT);
-        assertEquals(PRODUCT_DTO, productDto);
+        ProductDtoRead productDto = mapper.transformProductToProductDtoRead(PRODUCT);
+        assertEquals(PRODUCT_DTO_READ, productDto);
     }
 
     @Test
-    public void shouldTransformProductDtoToProduct() {
-        Product product = mapper.transformProductDtoToProduct(PRODUCT_DTO);
+    public void shouldTransformProductDtoWriteToProduct() {
+        Product product = mapper.transformProductDtoWriteToProduct(PRODUCT_DTO_WRITE);
         assertEquals(PRODUCT, product);
     }
 
