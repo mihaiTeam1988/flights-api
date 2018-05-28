@@ -1,5 +1,7 @@
 .gradle
 /build/
+/classes/
+/logs/
 !gradle/wrapper/gradle-wrapper.jar
 
 
