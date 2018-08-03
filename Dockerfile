@@ -12,4 +12,4 @@ HEALTHCHECK --interval=5s --retries=10 CMD curl -fs http://localhost:8080/health
 EXPOSE 8080
 
 CMD java -Djava.security.egd=file:/dev/./urandom -jar -DADMIN_PASSWORD=$ADMIN_PASSWORD \
-    ./flights-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=$ENVIRONMENT
+    ./flights-api-0.0.1-SNAPSHOT.jar -Dspring.profiles.active=$ENVIRONMENT
