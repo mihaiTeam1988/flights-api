@@ -1,13 +1,9 @@
 spring:
   application:
-    name: wp-shop
+    name: and-flights
   h2:
     console:
       enabled: true
-
-server:
-  servlet:
-    contextPath: /shop
 
 logging:
   level:
