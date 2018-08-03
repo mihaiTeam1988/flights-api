@@ -1,0 +1,126 @@
+version: 2
+
+defaults: &jdk
+  docker:
+    - image: circleci/openjdk:8-jdk
+      environment:
+        CODECOV_TOKEN: 46b4791a3bde4ceb941e6330bc44b3be
+
+defaults: &docker
+  docker:
+    - image: quay.io/paulpop/docker-compose
+
+jobs:
+  build:
+    <<: *jdk
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependencies-{{ checksum "build.gradle" }}
+      - run:
+          name: Install dependencies and build deployable jar
+          command: gradle build -x test
+      - save_cache:
+          key: dependencies-{{ checksum "build.gradle" }}
+          paths:
+            - ~/.m2
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs/flights-api-0.0.1-SNAPSHOT.jar
+
+  test:
+    <<: *jdk
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependencies-{{ checksum "build.gradle" }}
+      - run:
+          name: Run all tests and upload to Codecov
+          command: |
+            gradle test jacocoTestReport
+              bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+      - save_cache:
+          key: dependencies-{{ checksum "build.gradle" }}
+          paths:
+            - ~/.m2
+      - store_test_results:
+          path: build/reports/test
+      - store_test_results:
+          path: build/reports/test
+
+  docker:
+    <<: *docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build container with the git commit sha version and latest version
+          command: docker build -t $IMAGE_NAME:$CIRCLE_SHA1 -t $IMAGE_NAME .
+      - run:
+          name: Start container and verify it's healthy
+          command: |
+            set -x
+            docker-compose up -d
+            docker run --network container:$APP_NAME mwendler/wget -qO- \
+              --retry-connrefused --tries=10 --waitretry 6 http://localhost:8080/health
+      - run:
+          name: Push image to Dockerhub
+          command: |
+            if [[ $CIRCLE_BRANCH == 'master' ]]; then
+                docker login -u $DOCKER_USER -p $DOCKER_PASSWORD docker.io
+                docker push $IMAGE_NAME:$CIRCLE_SHA1
+                docker push $IMAGE_NAME
+            else
+                echo Skipping this step as we are not on 'master' branch
+            fi
+  # 4) Deploy to the development environment - in this case we just run the container with the dev variable
+  deploy-dev:
+    machine: true
+    steps:
+      - checkout
+      - add_ssh_keys:
+            fingerprints:
+              - "97:d5:25:f7:8e:3c:fe:91:00:51:81:31:d3:ff:54:41"
+      - run:
+            name: Start swarm service in Dev
+            command: ssh -o "StrictHostKeyChecking=no" docker@35.176.209.102 "docker service create --name $APP_NAME-dev --publish 80:8080 --replicas=2 --constraint 'node.role == worker' -e ENVIRONMENT=dev $IMAGE_NAME:$CIRCLE_SHA1"
+
+  # 5) Deploy to the production environment - in this case we just run the container with the prod variable
+  deploy-prod:
+    machine: true
+    steps:
+      - checkout
+      - add_ssh_keys:
+            fingerprints:
+              - "97:d5:25:f7:8e:3c:fe:91:00:51:81:31:d3:ff:54:41"
+      - run:
+            name: Start swarm service in Dev
+            command: ssh -o "StrictHostKeyChecking=no" docker@35.176.209.102 "docker service create --name $APP_NAME-prod --publish 90:8080 --replicas=2 --constraint 'node.role == worker' -e ENVIRONMENT=prod $IMAGE_NAME:$CIRCLE_SHA1"
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - test
+      - docker:
+          context: default
+          requires:
+            - build
+            - test
+      - deploy-dev:
+          requires:
+            - docker
+          filters:
+            branches:
+              only: master
+      - promote:
+          type: approval
+          requires:
+            - deploy-dev
+      - deploy-prod:
+          requires:
+            - promote
