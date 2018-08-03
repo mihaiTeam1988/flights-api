@@ -1,0 +1,97 @@
+package com.and.flights.controller;
+
+import com.and.flights.model.domain.Product;
+import com.and.flights.model.transfer.ProductDtoRead;
+import com.and.flights.service.ProductService;
+import com.and.flights.util.Mapper;
+import com.and.flights.util.TestData;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.and.flights.model.transfer.ProductDtoWrite;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Arrays;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+public class ProductControllerTest {
+
+    private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    private Product product;
+    private ProductDtoRead productDtoRead;
+    private ProductDtoWrite productDtoWrite;
+
+    @Mock
+    private ProductService productService;
+
+    @Mock
+    private Mapper mapper;
+
+    @InjectMocks
+    private ProductController controller = new ProductController();
+
+    @Before
+    public void before() {
+        product = TestData.getProduct();
+        productDtoRead = TestData.getProductDtoRead();
+        productDtoWrite = TestData.getProductDtoWrite();
+
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+        when(mapper.transformProductToProductDtoRead(product)).thenReturn(productDtoRead);
+        when(mapper.transformProductDtoWriteToProduct(productDtoWrite)).thenReturn(product);
+    }
+
+    @Test
+    public void shouldGetAllProducts() throws Exception {
+
+        when(productService.getProducts()).thenReturn(Arrays.asList(product));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/products"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$[0].id", is(product.getId().intValue())))
+                .andExpect(jsonPath("$[0].name", is(product.getName())))
+                .andExpect(jsonPath("$[0].price", is(product.getPrice())))
+                .andExpect(jsonPath("$[0].currency", is(product.getCurrency())));
+
+        verify(productService, times(1)).getProducts();
+        verifyNoMoreInteractions(productService);
+    }
+
+    @Test
+    public void shouldCreateProduct() throws Exception {
+
+        when(productService.createProduct(product)).thenReturn(product.getId());
+        when(mapper.transformProductDtoWriteToProduct(any(ProductDtoWrite.class))).thenReturn(product);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                        .post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(productDtoWrite)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(product.getId().toString()));
+
+        verify(productService, times(1)).createProduct(product);
+        verifyNoMoreInteractions(productService);
+    }
+}
