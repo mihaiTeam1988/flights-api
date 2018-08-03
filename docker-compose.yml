@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  api:
+    build: .
+    container_name: flights-api
+    image: docker.io/mihaiteam1988/flights-api
+    ports:
+      - "8080:8080"
+    networks:
+      - overlay
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+
+networks:
+  overlay:
